@@ -18,12 +18,32 @@ interface Article {
   published_at: string | null;
 }
  
+interface SentimentShift {
+  timeframe: string;
+  score: number;
+  reason: string;
+}
+
+interface KeyPlayer {
+  name: string;
+  type: string;
+  role: string;
+}
+
+interface ContrarianPerspective {
+  perspective: string;
+  source: string;
+}
+ 
 interface StoryData {
   story_id: string;
   title: string;
   total_articles: number;
   summary: string;
   timeline: TimelineItem[];
+  sentiment_shifts?: SentimentShift[];
+  contrarian_perspectives?: ContrarianPerspective[];
+  players?: KeyPlayer[];
   articles: Article[];
 }
  
@@ -85,6 +105,52 @@ export default function StoryPage() {
                 </div>
               </div>
  
+              {/* Sentiment Tracker */}
+              {data.sentiment_shifts && data.sentiment_shifts.length > 0 && (
+                <div className="anim anim-3">
+                  <p className="section-label">Sentiment Momentum</p>
+                  <div className="sentiment-card">
+                    {data.sentiment_shifts.map((shift, i) => {
+                      const percentage = Math.min((Math.abs(shift.score) / 10) * 100, 100);
+                      const isPos = shift.score >= 0;
+                      return (
+                        <div key={i} className="sentiment-row">
+                          <div className="sentiment-timeframe">{shift.timeframe}</div>
+                          <div className="sentiment-bar-container">
+                            <div className="sentiment-axis left">
+                              {!isPos && <div className="sentiment-fill neg" style={{ width: `${percentage}%` }} />}
+                            </div>
+                            <div className="sentiment-center" />
+                            <div className="sentiment-axis right">
+                              {isPos && <div className="sentiment-fill pos" style={{ width: `${percentage}%` }} />}
+                            </div>
+                          </div>
+                          <div className="sentiment-reason">{shift.reason}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+ 
+              {/* Contrarian Perspectives */}
+              {data.contrarian_perspectives && data.contrarian_perspectives.length > 0 && (
+                <div className="anim anim-4">
+                  <p className="section-label">Contrarian Perspectives</p>
+                  <div className="contrarian-stack">
+                    {data.contrarian_perspectives.map((view, i) => (
+                      <div className="contrarian-item" key={i}>
+                        <div className="contrarian-icon">▾</div>
+                        <div className="contrarian-body">
+                          <p className="contrarian-text">"{view.perspective}"</p>
+                          <p className="contrarian-source">— {view.source}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Articles */}
               <div className="anim anim-4">
                 <p className="section-label">Source Articles</p>
@@ -103,6 +169,27 @@ export default function StoryPage() {
             {/* ── Sidebar ── */}
             <aside className="sidebar anim anim-3">
  
+              {/* Key Players */}
+              {data.players && data.players.length > 0 && (
+                <div className="players-card">
+                  <p className="section-label">Key Players</p>
+                  <div className="players-list">
+                    {data.players.map((player, i) => (
+                      <div className="player-item" key={i}>
+                        <div className="player-avatar">
+                          {player.name.substring(0, 1).toUpperCase()}
+                        </div>
+                        <div className="player-info">
+                          <p className="player-name">{player.name}</p>
+                          <p className="player-type">{player.type}</p>
+                          <p className="player-role">{player.role}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Timeline */}
               <div className="timeline-card">
                 <div className="timeline-header" style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px'}}>

@@ -4,6 +4,9 @@ from sqlalchemy import text
 from app.services.summary import generate_summary
 from app.services.timeline import extract_timeline
 from app.services.title import generate_title
+from app.services.sentiment import analyze_sentiment
+from app.services.players import extract_players
+from app.services.contrarian import extract_contrarian
 router = APIRouter()
 
 @router.get("/{story_id}")
@@ -32,11 +35,17 @@ def get_story(story_id: str):
     summary = generate_summary(articles_text)
     timeline = extract_timeline(articles_text)
     title = generate_title([a["content"] for a in articles])
+    sentiment_shifts = analyze_sentiment(articles_text)
+    players = extract_players(articles_text)
+    contrarian_perspectives = extract_contrarian(articles_text)
     return {
         "story_id": story_id,
         "title": title,
         "total_articles": len(articles),
         "summary": summary,
         "timeline": timeline,
+        "sentiment_shifts": sentiment_shifts,
+        "contrarian_perspectives": contrarian_perspectives,
+        "players": players,
         "articles": articles
     }
