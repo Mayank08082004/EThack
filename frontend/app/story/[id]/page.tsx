@@ -34,6 +34,12 @@ interface ContrarianPerspective {
   perspective: string;
   source: string;
 }
+
+interface Prediction {
+  event: string;
+  probability: string;
+  details: string;
+}
  
 interface StoryData {
   story_id: string;
@@ -44,6 +50,7 @@ interface StoryData {
   sentiment_shifts?: SentimentShift[];
   contrarian_perspectives?: ContrarianPerspective[];
   players?: KeyPlayer[];
+  predictions?: Prediction[];
   articles: Article[];
 }
  
@@ -164,6 +171,24 @@ export default function StoryPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Predictions */}
+              {data.predictions && data.predictions.length > 0 && (
+                <div className="anim anim-5" style={{marginTop: '40px'}}>
+                  <p className="section-label" style={{color: 'var(--gold)'}}>🔮 What to Watch Next</p>
+                  <div className="predictions-grid">
+                    {data.predictions.map((pred, i) => (
+                      <div className="prediction-card" key={i}>
+                        <div className="prediction-header">
+                          <h4 className="prediction-event">{pred.event}</h4>
+                          <span className={`prediction-prob ${pred.probability.toLowerCase()}`}>{pred.probability} Probability</span>
+                        </div>
+                        <p className="prediction-details">{pred.details}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </main>
  
             {/* ── Sidebar ── */}
@@ -222,7 +247,7 @@ export default function StoryPage() {
 
                 <div className="timeline-list">
                   {filteredTimeline.length === 0 ? (
-                    <p className="timeline-empty" style={{color: '#888', fontStyle: 'italic'}}>No events match the selected filters.</p>
+                    <p className="timeline-empty" style={{color: 'var(--muted)', fontStyle: 'italic'}}>No events match the selected filters.</p>
                   ) : filteredTimeline.map((item, i) => {
                     const isPos = item.impact === "Positive";
                     return (
@@ -234,7 +259,7 @@ export default function StoryPage() {
                         <div className="timeline-body">
                           <div className="timeline-meta" style={{display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px'}}>
                             <p className="timeline-stage" style={{margin: 0}}>{item.stage}</p>
-                            {item.date && <span className="timeline-date" style={{fontSize: '0.75rem', color: '#888'}}>{item.date}</span>}
+                            {item.date && <span className="timeline-date" style={{fontSize: '0.75rem', color: 'var(--muted)'}}>{item.date}</span>}
                           </div>
                           <p className="timeline-event">{item.event}</p>
                           <span className={`impact-badge ${isPos ? "pos" : item.impact === "Negative" ? "neg" : "neu"}`}>

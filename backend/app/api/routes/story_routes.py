@@ -7,6 +7,7 @@ from app.services.title import generate_title
 from app.services.sentiment import analyze_sentiment
 from app.services.players import extract_players
 from app.services.contrarian import extract_contrarian
+from app.services.predictions import extract_predictions
 router = APIRouter()
 
 @router.get("/{story_id}")
@@ -38,6 +39,7 @@ def get_story(story_id: str):
     sentiment_shifts = analyze_sentiment(articles_text)
     players = extract_players(articles_text)
     contrarian_perspectives = extract_contrarian(articles_text)
+    predictions = extract_predictions(articles_text)
     return {
         "story_id": story_id,
         "title": title,
@@ -47,5 +49,6 @@ def get_story(story_id: str):
         "sentiment_shifts": sentiment_shifts,
         "contrarian_perspectives": contrarian_perspectives,
         "players": players,
+        "predictions": predictions,
         "articles": articles
     }

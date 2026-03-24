@@ -7,7 +7,7 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
-def extract_contrarian(articles):
+def extract_predictions(articles):
     articles = articles[:3]
 
     combined_text = "\n".join([a[:300] for a in articles])
@@ -19,13 +19,13 @@ def extract_contrarian(articles):
             {
                 "role": "system",
                 "content": (
-                    "Search the given news articles for dissenting opinions, alternative analyses, or counter-narratives that challenge the main overarching story.\n"
+                    "Based on the provided news articles, project 1 to 3 logical next steps, upcoming catalysts, or 'what to watch next' scenarios for this storyline.\n"
                     "Return ONLY a valid JSON array.\n"
                     "Format:\n"
                     "[\n"
-                    "  {\"perspective\": \"...\", \"source\": \"Name of person/entity or article snippet\"}\n"
+                    "  {\"event\": \"...\", \"probability\": \"High/Medium/Low\", \"details\": \"Brief explanation of why this is the next logical catalyst\"}\n"
                     "]\n"
-                    "CRITICAL: You MUST ONLY use information strictly and explicitly stated in the provided text. Do NOT invent, hallucinate, or assume any perspectives, names, or news outlets. If there are NO genuine contrarian views explicitly in the text, you MUST return an empty array []. Do NOT add any markdown formatting."
+                    "Extrapolate logically based on the trajectory of the events. Do NOT add any markdown formatting or explanations."
                 )
             },
             {
@@ -43,5 +43,5 @@ def extract_contrarian(articles):
             text = text[:-3]
         return json.loads(text.strip())
     except Exception as e:
-        print("Contrarian parse error:", e)
+        print("Predictions parse error:", e)
         return []
