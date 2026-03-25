@@ -1,6 +1,6 @@
 'use client';
  
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import API from "@/services/api";
  
@@ -40,6 +40,11 @@ interface Prediction {
   probability: string;
   details: string;
 }
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  text: string;
+}
  
 interface StoryData {
   story_id: string;
@@ -60,6 +65,16 @@ export default function StoryPage() {
   const [data, setData] = useState<StoryData | null>(null);
   const [filterImpact, setFilterImpact] = useState<string>("All");
   const [filterStage, setFilterStage] = useState<string>("All");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      role: "assistant",
+      text: "Ask me anything about this story and I’ll answer from the tracked articles.",
+    },
+  ]);
  
   useEffect(() => {
     if (!params?.id) return;
@@ -72,6 +87,45 @@ export default function StoryPage() {
     if (filterStage !== "All" && t.stage !== filterStage) return false;
     return true;
   }) || [];
+
+  useEffect(() => {
+    if (!chatOpen || !chatMessagesRef.current) return;
+    chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+  }, [chatMessages, chatOpen]);
+
+  const handleSendChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = chatInput.trim();
+    if (!trimmed || !params?.id || chatLoading) return;
+
+    setChatMessages(prev => [...prev, { role: "user", text: trimmed }]);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const history = chatMessages.slice(-8).map((item) => ({
+        role: item.role,
+        text: item.text,
+      }));
+
+      const res = await API.post(`/stories/${params.id}/chat`, {
+        message: trimmed,
+        history,
+      });
+      const reply = res.data?.reply || "No response received.";
+      setChatMessages(prev => [...prev, { role: "assistant", text: reply }]);
+    } catch {
+      setChatMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          text: "I couldn’t get a response right now. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
  
   return (
     <>
@@ -111,7 +165,7 @@ export default function StoryPage() {
                   <p className="summary-text">{data.summary}</p>
                 </div>
               </div>
- 
+
               {/* Sentiment Tracker */}
               {data.sentiment_shifts && data.sentiment_shifts.length > 0 && (
                 <div className="anim anim-3">
@@ -274,6 +328,73 @@ export default function StoryPage() {
  
             </aside>
           </div>
+
+          {chatOpen && (
+            <div className="chat-dialog-wrap">
+              <div className="chat-dialog">
+                <div className="chat-header">
+                  <div>
+                    <p className="chat-title">Story Chatbot</p>
+                    <p className="chat-subtitle">Ask about events, players, predictions, or sentiment.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setChatOpen(false)}
+                    className="chat-close"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="chat-messages" ref={chatMessagesRef}>
+                  {chatMessages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`chat-bubble ${message.role === "user" ? "chat-bubble-user" : "chat-bubble-assistant"}`}
+                    >
+                      <p className="chat-role">
+                        {message.role === "user" ? "You" : "Assistant"}
+                      </p>
+                      <p className="chat-text">{message.text}</p>
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="chat-thinking">
+                      Assistant is thinking...
+                    </div>
+                  )}
+                </div>
+
+                <form onSubmit={handleSendChat} className="chat-input-row">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask about key events, players, sentiment..."
+                    className="search-input"
+                    disabled={chatLoading}
+                    style={{ margin: 0, minHeight: "44px" }}
+                  />
+                  <button
+                    type="submit"
+                    className="search-button chat-send"
+                    disabled={chatLoading || !chatInput.trim()}
+                    style={{ margin: 0 }}
+                  >
+                    {chatLoading ? "Sending" : "Send"}
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setChatOpen(prev => !prev)}
+            aria-label="Toggle story chatbot"
+            className="chat-launcher"
+          >
+            {chatOpen ? "✕" : "💬"}
+          </button>
         </div>
       )}
     </>
