@@ -28,5 +28,7 @@ feedparser
 beautifulsoup4
 trafilatura
 email-validator
-
+google-generativeai
+dotenv
+fastembed
 
