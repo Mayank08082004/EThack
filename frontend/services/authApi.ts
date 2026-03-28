@@ -79,3 +79,28 @@ export async function apiSavePreferences(genres: string[]): Promise<PreferencesR
   );
   return data;
 }
+
+// ── News API ─────────────────────────────────────────────────────────────────
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  image: string;
+  link: string;
+  source: string;
+  genres: string[];
+  published_at: string;
+}
+
+export async function apiGetNews(): Promise<NewsArticle[]> {
+  const { data } = await axios.get<NewsArticle[]>(`${API}/news`, {
+    headers: authHeader(),
+  });
+  return data;
+}
+
+export async function apiSyncNews(): Promise<void> {
+  await axios.post(`${API}/news/sync`, {}, { headers: authHeader() });
+}

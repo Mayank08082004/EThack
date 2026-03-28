@@ -6,6 +6,7 @@ from app.api.routes import article_routes, story_routes
 from app.api.routes.search_routes import router as search_router
 from app.api.routes.auth_routes import router as auth_router
 from app.api.routes.preferences_routes import router as preferences_router
+from app.api.routes.news_routes import router as news_router
 
 app = FastAPI()
 
@@ -22,6 +23,7 @@ app.include_router(story_routes.router, prefix="/stories")
 app.include_router(search_router)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(preferences_router, prefix="/preferences", tags=["preferences"])
+app.include_router(news_router, prefix="/news", tags=["news"])
 
 
 @app.get("/")
