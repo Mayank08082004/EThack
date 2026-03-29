@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import API from "@/services/api";
-import { MessageSquare, X, Send, Bot, User, ArrowLeft } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, ArrowLeft, Tv2 } from 'lucide-react';
  
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface TimelineItem {
@@ -72,6 +72,7 @@ export default function StoryPage() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -155,7 +156,7 @@ export default function StoryPage() {
           </nav>
  
           {/* ── Hero ── */}
-          <header className="hero">
+          <header className="hero" style={{ position: 'relative' }}>
             <p className="hero-eyebrow anim anim-1">Market Intelligence</p>
             <h1 className="hero-title anim anim-2">
               {data.title}
@@ -166,6 +167,79 @@ export default function StoryPage() {
                 <span className="meta-chip-value">{data.total_articles} Articles</span>
               </div>
             </div>
+
+            {/* ── ET Video Player (top-right) ── */}
+            {showVideo && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '24px',
+                  right: '24px',
+                  width: '260px',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(212, 175, 55, 0.45)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.1)',
+                  background: '#0a0a0a',
+                  zIndex: 50,
+                }}
+              >
+                {/* Header bar */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '6px 10px',
+                    background: 'rgba(212, 175, 55, 0.08)',
+                    borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Tv2 size={13} color="var(--gold)" strokeWidth={1.5} />
+                    <span style={{
+                      fontFamily: "'DM Mono', monospace",
+                      fontSize: '0.65rem',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'var(--gold)',
+                      fontWeight: 600,
+                    }}>
+                      ET Live
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowVideo(false)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: 'var(--muted)',
+                      transition: 'color 0.2s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+                    title="Dismiss video"
+                  >
+                    <X size={13} strokeWidth={2} />
+                  </button>
+                </div>
+
+                {/* Video */}
+                <video
+                  src="/ET_720p.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                  style={{ width: '100%', display: 'block', maxHeight: '160px', objectFit: 'cover' }}
+                />
+              </div>
+            )}
           </header>
  
           {/* ── Body Grid ── */}
