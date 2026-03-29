@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from sqlalchemy import text
 from app.services.summary import generate_summary
@@ -14,12 +15,18 @@ from app.services.embedding import get_embedding
 import httpx
 router = APIRouter()
 
-@router.get("/{story_id}")
-def get_story(story_id: str):
+def get_db():
     db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get("/{story_id}")
+def get_story(story_id: str, db: Session = Depends(get_db)):
 
     query = text("""
-        SELECT title, content, published_at
+        SELECT title, content, published_at, image, source
         FROM articles
         WHERE story_id = :story_id
         ORDER BY id ASC
@@ -31,19 +38,36 @@ def get_story(story_id: str):
         {
             "title": row[0],
             "content": row[1],
-            "published_at": row[2]
+            "published_at": row[2].strftime("%Y-%m-%d %H:%M:%S") if hasattr(row[2], 'strftime') else str(row[2]) if row[2] else None,
+            "image": row[3],
+            "source": row[4]
         }
         for row in result
     ]
-    articles_text = [row[1] for row in result]
+    
+    # Inject exact dates and titles into the text payload so the LLM doesn't hallucinate timelines
+    articles_text = [f"Date: {row[2]}\nTitle: {row[0]}\nContent: {row[1]}" for row in result]
 
-    summary = generate_summary(articles_text)
-    timeline = extract_timeline(articles_text)
-    title = generate_title([a["content"] for a in articles])
-    sentiment_shifts = analyze_sentiment(articles_text)
-    players = extract_players(articles_text)
-    contrarian_perspectives = extract_contrarian(articles_text)
-    predictions = extract_predictions(articles_text)
+    from concurrent.futures import ThreadPoolExecutor
+    
+    # Run all 7 LLM intelligence extractors concurrently to make the page lively (~3s instead of ~21s)
+    with ThreadPoolExecutor(max_workers=7) as executor:
+        f_summary = executor.submit(generate_summary, articles_text)
+        f_timeline = executor.submit(extract_timeline, articles_text)
+        f_title = executor.submit(generate_title, [a["content"] for a in articles])
+        f_sentiment = executor.submit(analyze_sentiment, articles_text)
+        f_players = executor.submit(extract_players, articles_text)
+        f_contrarian = executor.submit(extract_contrarian, articles_text)
+        f_predictions = executor.submit(extract_predictions, articles_text)
+        
+        summary = f_summary.result()
+        timeline = f_timeline.result()
+        title = f_title.result()
+        sentiment_shifts = f_sentiment.result()
+        players = f_players.result()
+        contrarian_perspectives = f_contrarian.result()
+        predictions = f_predictions.result()
+    
     return {
         "story_id": story_id,
         "title": title,
@@ -59,8 +83,7 @@ def get_story(story_id: str):
 
 
 @router.post("/{story_id}/chat", response_model=StoryChatResponse)
-def chat_with_story(story_id: str, body: StoryChatRequest):
-    db = SessionLocal()
+def chat_with_story(story_id: str, body: StoryChatRequest, db: Session = Depends(get_db)):
 
     try:
         query_embedding = get_embedding(body.message)

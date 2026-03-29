@@ -3,23 +3,27 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiGetPreferences, apiSavePreferences, getToken } from '@/services/authApi';
+import {
+  TrendingUp, Landmark, Cpu, Building2, Flame, Globe, Hotel,
+  Bitcoin, Handshake, Leaf, Map, Store, PiggyBank, HeartPulse, Car
+} from 'lucide-react';
 
 const GENRES = [
-  { id: 'markets', label: 'Markets & Equities', icon: '📈', desc: 'Stocks, indices, and trading insights' },
-  { id: 'economy', label: 'Economy & Policy', icon: '🏛️', desc: 'Macro trends, RBI, government policy' },
-  { id: 'tech', label: 'Tech & Startups', icon: '💻', desc: 'Unicorns, funding rounds, product launches' },
-  { id: 'banking', label: 'Banking & Finance', icon: '🏦', desc: 'Banks, NBFCs, credit, and lending' },
-  { id: 'commodities', label: 'Commodities', icon: '🛢️', desc: 'Oil, gold, metals, and agri markets' },
-  { id: 'global', label: 'Global Markets', icon: '🌐', desc: 'US, Europe, Asia—what moves the world' },
-  { id: 'realestate', label: 'Real Estate', icon: '🏢', desc: 'Property, REITs, infrastructure' },
-  { id: 'crypto', label: 'Crypto & Web3', icon: '₿', desc: 'Digital assets, DeFi, and blockchain' },
-  { id: 'corporate', label: 'Corporate & M&A', icon: '🤝', desc: 'Mergers, acquisitions, earnings' },
-  { id: 'sustainability', label: 'ESG & Sustainability', icon: '🌱', desc: 'Green energy, ESG investing, climate' },
-  { id: 'geopolitics', label: 'Geopolitics', icon: '🗺️', desc: 'Trade wars, sanctions, global tensions' },
-  { id: 'sme', label: 'SME & MSME', icon: '🏪', desc: 'Small business news and growth stories' },
-  { id: 'personal-finance', label: 'Personal Finance', icon: '💰', desc: 'Mutual funds, tax planning, savings' },
-  { id: 'healthcare', label: 'Healthcare & Pharma', icon: '💊', desc: 'Drug approvals, hospital chains, health-tech' },
-  { id: 'auto', label: 'Auto & Mobility', icon: '🚗', desc: 'EVs, OEMs, auto sector trends' },
+  { id: 'markets', label: 'Markets & Equities', icon: <TrendingUp size={20} strokeWidth={1.5} />, desc: 'Stocks, indices, and trading insights' },
+  { id: 'economy', label: 'Economy & Policy', icon: <Landmark size={20} strokeWidth={1.5} />, desc: 'Macro trends, RBI, government policy' },
+  { id: 'tech', label: 'Tech & Startups', icon: <Cpu size={20} strokeWidth={1.5} />, desc: 'Unicorns, funding rounds, product launches' },
+  { id: 'banking', label: 'Banking & Finance', icon: <Building2 size={20} strokeWidth={1.5} />, desc: 'Banks, NBFCs, credit, and lending' },
+  { id: 'commodities', label: 'Commodities', icon: <Flame size={20} strokeWidth={1.5} />, desc: 'Oil, gold, metals, and agri markets' },
+  { id: 'global', label: 'Global Markets', icon: <Globe size={20} strokeWidth={1.5} />, desc: 'US, Europe, Asia—what moves the world' },
+  { id: 'realestate', label: 'Real Estate', icon: <Hotel size={20} strokeWidth={1.5} />, desc: 'Property, REITs, infrastructure' },
+  { id: 'crypto', label: 'Crypto & Web3', icon: <Bitcoin size={20} strokeWidth={1.5} />, desc: 'Digital assets, DeFi, and blockchain' },
+  { id: 'corporate', label: 'Corporate & M&A', icon: <Handshake size={20} strokeWidth={1.5} />, desc: 'Mergers, acquisitions, earnings' },
+  { id: 'sustainability', label: 'ESG & Sustainability', icon: <Leaf size={20} strokeWidth={1.5} />, desc: 'Green energy, ESG investing, climate' },
+  { id: 'geopolitics', label: 'Geopolitics', icon: <Map size={20} strokeWidth={1.5} />, desc: 'Trade wars, sanctions, global tensions' },
+  { id: 'sme', label: 'SME & MSME', icon: <Store size={20} strokeWidth={1.5} />, desc: 'Small business news and growth stories' },
+  { id: 'personal-finance', label: 'Personal Finance', icon: <PiggyBank size={20} strokeWidth={1.5} />, desc: 'Mutual funds, tax planning, savings' },
+  { id: 'healthcare', label: 'Healthcare & Pharma', icon: <HeartPulse size={20} strokeWidth={1.5} />, desc: 'Drug approvals, hospital chains, health-tech' },
+  { id: 'auto', label: 'Auto & Mobility', icon: <Car size={20} strokeWidth={1.5} />, desc: 'EVs, OEMs, auto sector trends' },
 ];
 
 export default function PreferencesPage() {

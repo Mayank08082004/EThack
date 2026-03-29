@@ -7,10 +7,9 @@ client = OpenAI(
 )
 
 def generate_summary(articles):
-    # 🔥 Limit content (IMPORTANT)
-    articles = articles[:3]  # only first 3 articles
+    articles = list(articles)[:20]
 
-    combined_text = "\n\n".join([a[:500] for a in articles])  # limit each
+    combined_text = "\n\n".join([a[:1500] for a in articles])
 
     response = client.chat.completions.create(
         model="openai/gpt-4o-mini",

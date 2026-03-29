@@ -7,9 +7,9 @@ client = OpenAI(
 )
 
 def generate_title(articles):
-    articles = articles[:3]  # limit
+    articles = list(articles)[:20]
 
-    combined_text = "\n".join([a[:200] for a in articles])
+    combined_text = "\n".join([a[:800] for a in articles])
 
     response = client.chat.completions.create(
         model="openai/gpt-4o-mini",
