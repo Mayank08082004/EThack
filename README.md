@@ -1,112 +1,141 @@
-# ET — The Personalized Newsroom
+# ET Intelligence Newsroom
 
-Welcome to the ET Personalized Newsroom repository!
+An AI-native business news experience built for hackathon speed and real-world relevance.
 
-This repository contains the ongoing work for the **ET — The Personalized Newsroom** Hackathon project. This README serves as a living document of **what is already built** and **what needs to be built next**.
+## Problem Statement
 
-Please refer to the original `HACKATHON_GUIDE.md` for context and architecture rules.
+Business news is still consumed like it is 2005: static articles, same homepage for everyone, minimal interactivity.
 
----
+Readers today need context, personalization, and actionable intelligence, not just headlines.
 
-<<<<<<< HEAD
-=======
-## 🚀 Quick Start / Setup
+## Our Hackathon Pitch
 
-Follow these steps to get the ET Intelligence Newsroom running on your local machine.
+ET Intelligence Newsroom turns traditional business coverage into a living intelligence product.
 
-### 1. Prerequisites
+Instead of reading disconnected articles, users get:
 
-- **Node.js** (v18+)
-- **Python** (v3.10+)
-- **Supabase Account** (for database & vector storage)
-- **Gemini API Key** (for AI analysis)
+- personalized newsroom based on their interests
+- AI-generated story arcs for ongoing events
+- conversational story briefings
+- sentiment and contrarian analysis
+- multilingual accessibility support
 
-### 2. Backend Setup
+## What We Built
+
+### 1. Personalized Newsroom (My ET)
+- Supabase-authenticated user sessions
+- genre-based preference onboarding
+- personalized news feed retrieval
+- background sync pipeline with embeddings for relevance
+
+### 2. Story Arc Tracker
+- clustering and aggregation of related business stories
+- AI-generated summary and dynamic story title
+- event timeline extraction
+- sentiment shifts across article evolution
+- key player detection
+- contrarian perspective surfacing
+- "what to watch next" predictions
+
+### 3. Interactive Story Chat (News Navigator Style)
+- chat with the context of a specific tracked story
+- vector-similarity retrieval over relevant article chunks
+- Gemini-powered responses grounded in retrieved context
+
+### 4. Search-First Story Navigation
+- query-driven story discovery endpoint
+- direct jump from search query to deep story intelligence view
+
+### 5. Vernacular Assistance Layer
+- integrated Google Translate widget across the app shell
+- quick multi-language support for improved accessibility
+
+## Why This Feels Different
+
+- Not a feed. A personalized intelligence workspace.
+- Not article-by-article reading. A full evolving narrative.
+- Not passive consumption. Interactive follow-up with AI.
+
+## High-Level Architecture
+
+### Frontend
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Tailwind CSS 4
+- GSAP
+- Axios
+
+### Backend
+- FastAPI
+- SQLAlchemy
+- Supabase (Auth + data access)
+- PostgreSQL (including vector similarity queries)
+- Uvicorn
+
+### AI Layer
+- Gemini (OpenAI-compatible endpoint)
+- local embedding generation with FastEmbed
+- custom intelligence services for summary, timeline, sentiment, player extraction, contrarian analysis, and predictions
+
+## Repository Layout
+
+- backend: FastAPI routes, services, schemas, DB integration
+- frontend: Next.js app with auth, dashboard, story intelligence, and article reader flows
+
+## Prerequisites
+
+- Node.js 18+
+- npm
+- Python 3.10+
+- pip
+- Supabase project credentials
+- Gemini API key
+
+## Environment Setup
+
+Use backend/.env.example as reference.
+
+Create backend/.env with:
+
+- DATABASE_URL
+- SUPABASE_URL
+- SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- GEMINI_API_KEY
+
+Create frontend/.env.local with:
+
+- NEXT_PUBLIC_API_URL=http://localhost:8000
+
+## Run Locally
+
+### 1. Start Backend (FastAPI)
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Windows (PowerShell)
+venv\Scripts\Activate.ps1
+
+# macOS/Linux
+# source venv/bin/activate
+
 pip install -r requirements.txt
-cp .env.example .env      # Update with your Supabase & Gemini keys
 uvicorn app.main:app --reload
 ```
 
-### 3. Frontend Setup
+Backend: http://localhost:8000
+
+### 2. Start Frontend (Next.js)
+
+Open a new terminal:
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local # Update with your Supabase keys
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`.
+Frontend: http://localhost:3000
 
----
-
->>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
-## 🟢 What is DONE (Current Progress)
-
-### 1. The Core Infrastructure & Phase 1 (100% Complete)
-
-Built by Mayank, the **Story Arc Tracker** is fully complete and functional.
-
-- **Backend:** `story_routes.py` along with all its AI services (`timeline.py`, `sentiment.py`, `players.py`, `contrarian.py`, `predictions.py`) are fully integrated.
-- **Frontend:** The `/frontend/app/story/` module and the global design tokens (`globals.css`) are complete and set the design system.
-
-### 2. My ET — The Personalized Newsroom (Backend 80% Complete)
-
-The backend logic required for fetching and analyzing user preferences is mostly complete.
-
-- **Backend:** `preferences_routes.py` (saves user genres to Supabase) and `news_routes.py` (fetches personalized news and syncs it via embeddings) are operational.
-
-### 3. News Navigator (Backend Logic 50% Complete)
-
-The core logic for interacting with intelligence briefings is built.
-
-- **Backend:** `services/chatbot.py` exists and successfully integrates `gemini-2.5-flash` to answer user questions using story context and chat history.
-
-<<<<<<< HEAD
-=======
-### 4. Vernacular Business News Engine (100% Complete)
-
-Built using the Google Translate API, the platform now supports real-time translation into multiple Indian regional languages.
-
-- **Frontend:** `app/components/GTranslate.tsx` provides a floating localized translation selector across all app routes.
-
->>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
----
-
-## 🏃 What to Do NEXT (Team Action Items)
-
-Here is exactly what the remainder of the team needs to work on next to complete Phase 2:
-
-### Immediate Priority: Connect "My ET" to the Frontend
-
-1. **Frontend:** You need to create `/frontend/app/my-et/page.tsx`.
-2. **Task:** This page needs to fetch the data from the newly built `news_routes.py` and `preferences_routes.py` endpoints and display the customized news feed using the pre-existing `.article-item` UI styles.
-
-### Immediate Priority: Wire up "News Navigator"
-
-1. **Backend:** You have the logic (`services/chatbot.py`), but you need to expose it! Create `backend/app/api/routes/navigator_routes.py` to handle the HTTP requests for the chatbot. Make sure to register this route in `backend/app/main.py`.
-2. **Frontend:** Create `/frontend/app/navigator/page.tsx` and build the floating chat widget to interact with this new route.
-
-### High Priority: Start "AI News Video Studio" from Scratch
-
-1. **Status:** 0% Complete.
-2. **Backend:** Create `backend/app/api/routes/video_routes.py` and `backend/app/services/video_gen.py`. You will need to install and use text-to-speech (e.g. ElevenLabs) and video frameworks. **Don't forget to run `pip freeze > requirements.txt` afterwards.**
-3. **Frontend:** Create `/frontend/app/studio/page.tsx` with loading states for video generation.
-
-<<<<<<< HEAD
-### High Priority: Start "Vernacular Business News Engine" from Scratch
-
-1. **Status:** 0% Complete.
-2. **Backend:** Create `backend/app/api/routes/vernacular_routes.py` and `backend/app/services/translation.py`. Utilize LLMs (Gemini/OpenAI) to handle contextual news localization.
-3. **Frontend:** Create `/frontend/app/vernacular/page.tsx` with a multi-language selector UI.
-
-=======
->>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
----
-
-*For UI development, please stick to the premium dark-mode aesthetic provided in `globals.css`.*
