@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import API from "@/services/api";
+import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
  
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface TimelineItem {
@@ -16,6 +17,8 @@ interface Article {
   title: string;
   content: string;
   published_at: string | null;
+  image?: string;
+  source?: string;
 }
  
 interface SentimentShift {
@@ -65,10 +68,11 @@ export default function StoryPage() {
   const [data, setData] = useState<StoryData | null>(null);
   const [filterImpact, setFilterImpact] = useState<string>("All");
   const [filterStage, setFilterStage] = useState<string>("All");
-  const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const chatInputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
@@ -89,9 +93,12 @@ export default function StoryPage() {
   }) || [];
 
   useEffect(() => {
-    if (!chatOpen || !chatMessagesRef.current) return;
-    chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
-  }, [chatMessages, chatOpen]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  useEffect(() => {
+    if (chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
+  }, [chatOpen]);
 
   const handleSendChat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,15 +220,92 @@ export default function StoryPage() {
               )}
 
               {/* Articles */}
-              <div className="anim anim-4">
+              <div className="anim anim-4" style={{ marginTop: '48px' }}>
                 <p className="section-label">Source Articles</p>
-                <div className="articles-stack">
-                  {data.articles.map((a, i) => (
-                    <article className="article-item" key={i}>
-                      <p className="article-index">Article {String(i + 1).padStart(2, "0")}</p>
-                      <h3 className="article-title">{a.title}</h3>
-                      <p className="article-content">{a.content}</p>
-                    </article>
+                <div className="news-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  {data.articles.map((item, i) => (
+                    <div
+                      key={i}
+                      className="news-card"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '1.5rem',
+                        padding: '1.5rem',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '12px',
+                        color: 'inherit',
+                        transition: 'all 0.2s ease',
+                        alignItems: 'flex-start'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      }}
+                    >
+                      {/* Image Left */}
+                      {item.image && (
+                        <div style={{ flexShrink: 0, width: '200px', height: '140px', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => e.currentTarget.style.display = 'none'}
+                          />
+                        </div>
+                      )}
+
+                      {/* Content Right */}
+                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', alignItems: 'center' }}>
+                          <span style={{ 
+                            fontSize: '0.75rem', 
+                            color: 'var(--gold)', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.05em',
+                            background: 'rgba(212, 175, 55, 0.1)',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}>
+                            {item.source || 'News Hub'}
+                          </span>
+                          {item.published_at && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                              {isNaN(new Date(item.published_at).getTime()) 
+                                ? item.published_at 
+                                : new Date(item.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="news-card-title" style={{ 
+                          fontSize: '1.2rem', 
+                          fontWeight: 600, 
+                          lineHeight: 1.4, 
+                          marginBottom: '8px',
+                          fontFamily: "'Playfair Display', serif"
+                        }}>
+                          {item.title}
+                        </h3>
+                        <p className="news-card-desc" style={{ 
+                          fontSize: '0.85rem', 
+                          color: 'var(--muted)', 
+                          lineHeight: 1.6,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -328,75 +412,62 @@ export default function StoryPage() {
  
             </aside>
           </div>
-
-          {chatOpen && (
-            <div className="chat-dialog-wrap">
-              <div className="chat-dialog">
-                <div className="chat-header">
-                  <div>
-                    <p className="chat-title">Story Chatbot</p>
-                    <p className="chat-subtitle">Ask about events, players, predictions, or sentiment.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setChatOpen(false)}
-                    className="chat-close"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="chat-messages" ref={chatMessagesRef}>
-                  {chatMessages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`chat-bubble ${message.role === "user" ? "chat-bubble-user" : "chat-bubble-assistant"}`}
-                    >
-                      <p className="chat-role">
-                        {message.role === "user" ? "You" : "Assistant"}
-                      </p>
-                      <p className="chat-text">{message.text}</p>
-                    </div>
-                  ))}
-                  {chatLoading && (
-                    <div className="chat-thinking">
-                      Assistant is thinking...
-                    </div>
-                  )}
-                </div>
-
-                <form onSubmit={handleSendChat} className="chat-input-row">
-                  <input
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Ask about key events, players, sentiment..."
-                    className="search-input"
-                    disabled={chatLoading}
-                    style={{ margin: 0, minHeight: "44px" }}
-                  />
-                  <button
-                    type="submit"
-                    className="search-button chat-send"
-                    disabled={chatLoading || !chatInput.trim()}
-                    style={{ margin: 0 }}
-                  >
-                    {chatLoading ? "Sending" : "Send"}
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setChatOpen(prev => !prev)}
-            aria-label="Toggle story chatbot"
-            className="chat-launcher"
-          >
-            {chatOpen ? "✕" : "💬"}
-          </button>
         </div>
       )}
+
+      {/* ── Floating Chat FAB ── */}
+      <button
+        className={`article-chat-fab ${chatOpen ? 'article-chat-fab--active' : ''}`}
+        onClick={() => setChatOpen(o => !o)}
+        title="Ask AI about this story"
+      >
+        {chatOpen ? <X size={20} strokeWidth={2} /> : <MessageSquare size={20} strokeWidth={1.5} />}
+        {!chatOpen && <span className="article-chat-fab-label">Ask AI</span>}
+      </button>
+
+      {/* ── Chat Panel ── */}
+      <div className={`article-chat-panel ${chatOpen ? 'article-chat-panel--open' : ''}`}>
+        <div className="article-chat-header">
+          <div className="article-chat-header-left">
+            <Bot size={16} strokeWidth={1.5} style={{ color: 'var(--gold)' }} />
+            <span className="article-chat-title">Story Intelligence</span>
+          </div>
+          <button className="article-chat-close" onClick={() => setChatOpen(false)}><X size={16} /></button>
+        </div>
+
+        <div className="article-chat-messages">
+          {chatMessages.map((msg, i) => (
+            <div key={i} className={`article-chat-msg article-chat-msg--${msg.role}`}>
+              <div className="article-chat-avatar">
+                {msg.role === 'assistant' ? <Bot size={14} strokeWidth={1.5} /> : <User size={14} strokeWidth={1.5} />}
+              </div>
+              <div className="article-chat-bubble">{msg.text}</div>
+            </div>
+          ))}
+          {chatLoading && (
+            <div className="article-chat-msg article-chat-msg--assistant">
+              <div className="article-chat-avatar"><Bot size={14} strokeWidth={1.5} /></div>
+              <div className="article-chat-bubble article-chat-typing"><span /><span /><span /></div>
+            </div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        <form className="article-chat-input-row" onSubmit={handleSendChat}>
+          <input
+            ref={chatInputRef}
+            className="article-chat-input"
+            type="text"
+            placeholder="Ask about events, players, predictions…"
+            value={chatInput}
+            onChange={e => setChatInput(e.target.value)}
+            disabled={chatLoading}
+          />
+          <button type="submit" className="article-chat-send" disabled={!chatInput.trim() || chatLoading}>
+            <Send size={15} strokeWidth={2} />
+          </button>
+        </form>
+      </div>
     </>
   );
 }

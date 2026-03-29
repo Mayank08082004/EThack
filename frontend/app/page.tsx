@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { TrendingUp, Target, MessageSquare, Video, Globe } from 'lucide-react';
 
 const FEATURES = [
-  { icon: '📈', title: 'Story Arc Tracker', desc: 'Watch AI build a complete chronological narrative behind any business story.' },
-  { icon: '🎯', title: 'Personalised Feed', desc: 'Your newsfeed, curated by genre preferences you choose — updated every hour.' },
-  { icon: '💬', title: 'News Navigator', desc: 'Chat with a deeply analysed mega-report of any breaking event in real time.' },
-  { icon: '🎬', title: 'AI Video Studio', desc: 'Transform ET articles into broadcast-quality short videos in seconds.' },
-  { icon: '🌍', title: 'Vernacular Engine', desc: 'Complex financial concepts translated into 8 Indian regional languages.' },
+  { icon: <TrendingUp size={22} strokeWidth={1.5} />, title: 'Story Arc Tracker', desc: 'Watch AI build a complete chronological narrative behind any business story.' },
+  { icon: <Target size={22} strokeWidth={1.5} />, title: 'Personalised Feed', desc: 'Your newsfeed, curated by genre preferences you choose — updated every hour.' },
+  { icon: <MessageSquare size={22} strokeWidth={1.5} />, title: 'News Navigator', desc: 'Chat with a deeply analysed mega-report of any breaking event in real time.' },
+  { icon: <Video size={22} strokeWidth={1.5} />, title: 'AI Video Studio', desc: 'Transform ET articles into broadcast-quality short videos in seconds.' },
+  { icon: <Globe size={22} strokeWidth={1.5} />, title: 'Vernacular Engine', desc: 'Complex financial concepts translated into 8 Indian regional languages.' },
 ];
 
 const STATS = [
@@ -55,14 +56,18 @@ export default function LandingPage() {
 
     // GSAP hero entrance
     import('gsap').then(({ default: gsap }) => {
-      gsap.from('.landing-anim', {
-        opacity: 0,
-        y: 36,
-        stagger: 0.14,
-        duration: 0.85,
-        ease: 'power3.out',
-        delay: 0.15,
-      });
+      gsap.fromTo('.landing-anim', 
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.14,
+          duration: 0.85,
+          ease: 'power3.out',
+          delay: 0.15,
+          clearProps: "all"
+        }
+      );
     });
 
     return () => {
@@ -177,9 +182,13 @@ export default function LandingPage() {
           <div className="landing-features-grid">
             {FEATURES.map((f, i) => (
               <div key={f.title} className={`landing-feature-card anim anim-${(i % 3) + 2}`}>
-                <div className="lfc-icon">{f.icon}</div>
-                <h3 className="lfc-title">{f.title}</h3>
-                <p className="lfc-desc">{f.desc}</p>
+                <span className="lfc-number">0{i + 1}</span>
+                <div className="lfc-icon-badge">{f.icon}</div>
+                <div className="lfc-body">
+                  <h3 className="lfc-title">{f.title}</h3>
+                  <p className="lfc-desc">{f.desc}</p>
+                </div>
+                <span className="lfc-arrow">→</span>
               </div>
             ))}
           </div>
@@ -247,10 +256,10 @@ export default function LandingPage() {
           <p className="landing-eyebrow-sm">Join 2.4 Million Readers</p>
           <h2 className="landing-final-title">Your newsroom.<br /><em>Yours alone.</em></h2>
           <p className="landing-final-sub">
-            Create a free account and personalise your ET Intelligence feed in under a minute.
+            {user ? "Your personalized intelligence feed is ready and waiting for you." : "Create a free account and personalise your ET Intelligence feed in under a minute."}
           </p>
-          <Link href="/auth?tab=signup" className="landing-hero-cta">
-            Get Started Free →
+          <Link href={user ? "/dashboard" : "/auth?tab=signup"} className="landing-hero-cta">
+            {user ? "Open My Newsroom →" : "Get Started Free →"}
           </Link>
         </div>
       </section>
@@ -261,8 +270,14 @@ export default function LandingPage() {
           <span className="landing-footer-brand">ET Intelligence</span>
           <span className="landing-footer-copy">© 2026 The Economic Times. All rights reserved.</span>
           <div className="landing-footer-links">
-            <Link href="/auth" className="landing-footer-link">Sign In</Link>
-            <Link href="/auth?tab=signup" className="landing-footer-link">Sign Up</Link>
+            {user ? (
+              <Link href="/dashboard" className="landing-footer-link">Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/auth" className="landing-footer-link">Sign In</Link>
+                <Link href="/auth?tab=signup" className="landing-footer-link">Sign Up</Link>
+              </>
+            )}
             <Link href="/story" className="landing-footer-link">Story Tracker</Link>
           </div>
         </div>

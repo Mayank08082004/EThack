@@ -5,13 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { apiGetNews, apiSyncNews, NewsArticle } from '../../services/authApi';
+import API from "@/services/api";
+import { TrendingUp, Target, MessageSquare, Video, Globe } from 'lucide-react';
 
 const tools = [
-  { id: 'story', title: 'Story Arc Tracker', desc: 'Pick any ongoing business story and watch AI build a complete chronological narrative and predictive map.', icon: '📈', href: '/story' },
-  { id: 'my-et', title: 'My ET Personalized', desc: 'A completely custom newsfeed tailored specifically to your exact investment portfolio or persona focus.', icon: '🎯', href: '/my-et' },
-  { id: 'navigator', title: 'News Navigator', desc: 'An interactive intelligence briefing. Chat with a deeply analyzed mega-report of specific events.', icon: '💬', href: '/navigator' },
-  { id: 'studio', title: 'AI Video Studio', desc: 'Instantly transform any breaking ET article into a broadcast-quality short video with dynamic narration.', icon: '🎬', href: '/studio' },
-  { id: 'vernacular', title: 'Vernacular Engine', desc: 'Real-time, context-aware translations of complex financial concepts into localized Indian languages.', icon: '🌍', href: '/vernacular' },
+  { id: 'story', title: 'Story Arc Tracker', desc: 'Pick any ongoing business story and watch AI build a complete chronological narrative and predictive map.', icon: <TrendingUp size={20} strokeWidth={1.5} />, href: '/story' },
+  { id: 'my-et', title: 'My ET Personalized', desc: 'A completely custom newsfeed tailored specifically to your exact investment portfolio or persona focus.', icon: <Target size={20} strokeWidth={1.5} />, href: '/my-et' },
+  { id: 'navigator', title: 'News Navigator', desc: 'An interactive intelligence briefing. Chat with a deeply analyzed mega-report of specific events.', icon: <MessageSquare size={20} strokeWidth={1.5} />, href: '/navigator' },
+  { id: 'studio', title: 'AI Video Studio', desc: 'Instantly transform any breaking ET article into a broadcast-quality short video with dynamic narration.', icon: <Video size={20} strokeWidth={1.5} />, href: '/studio' },
+  { id: 'vernacular', title: 'Vernacular Engine', desc: 'Real-time, context-aware translations of complex financial concepts into localized Indian languages.', icon: <Globe size={20} strokeWidth={1.5} />, href: '/vernacular' },
 ];
 
 // Duplicate for seamless infinite loop
@@ -21,6 +23,8 @@ export default function Dashboard() {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
   const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Tween | null>(null);
@@ -57,6 +61,19 @@ export default function Dashboard() {
 
     loadNews();
   }, [router]);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const res = await API.get(`/search?query=${query}`);
+      router.push(`/story/${res.data.story_id}`);
+    } catch (err) {
+      console.error(err);
+      setSearching(false);
+    }
+  };
 
   // GSAP infinite carousel
   useEffect(() => {
@@ -135,32 +152,24 @@ export default function Dashboard() {
               Update preferences →
             </Link>
           </p>
+
+          <div className="dash-header-anim" style={{ marginTop: '48px', maxWidth: '640px', margin: '48px auto 0' }}>
+            <p className="hero-eyebrow" style={{ justifyContent: 'center', marginBottom: '16px' }}>Story Arc Tracker</p>
+            <form onSubmit={handleSearch} className="search-form">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="e.g. Zomato earnings, Tesla autopilot..."
+                className="search-input"
+                disabled={searching}
+              />
+              <button type="submit" className="search-button" disabled={searching}>
+                {searching ? "Searching..." : "Search Stories"}
+              </button>
+            </form>
+          </div>
         </header>
 
-        {/* ── Carousel ── */}
-        <div className="carousel-section dash-header-anim">
-          <p className="carousel-label">AI Intelligence Modules</p>
-          <div className="carousel-viewport">
-            <div className="carousel-track" ref={trackRef}>
-              {CAROUSEL_ITEMS.map((tool, i) => (
-                <Link
-                  key={`${tool.id}-${i}`}
-                  href={tool.href}
-                  className="carousel-card"
-                >
-                  <div className="carousel-card-icon">{tool.icon}</div>
-                  <h2 className="carousel-card-title">{tool.title}</h2>
-                  <p className="carousel-card-desc">{tool.desc}</p>
-                  <div className="carousel-card-link">Launch Module</div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Fade edges */}
-            <div className="carousel-fade carousel-fade--left" />
-            <div className="carousel-fade carousel-fade--right" />
-          </div>
-        </div>
 
         {/* ── Personalized News Feed ── */}
         <section className="news-feed-section dash-header-anim" style={{ marginTop: '4rem' }}>
@@ -175,12 +184,13 @@ export default function Dashboard() {
           ) : (
             <div className="news-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {news.map((item) => (
-                <a
+                <div
                   key={item.id}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="news-card"
+                  onClick={() => {
+                    sessionStorage.setItem(`article_${item.id}`, JSON.stringify(item));
+                    router.push(`/article/${item.id}`);
+                  }}
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -192,12 +202,13 @@ export default function Dashboard() {
                     textDecoration: 'none',
                     color: 'inherit',
                     transition: 'all 0.2s ease',
-                    alignItems: 'flex-start'
+                    alignItems: 'flex-start',
+                    cursor: 'pointer'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)'; // subtle gold border
+                    e.currentTarget.style.borderColor = 'rgba(229, 62, 62, 0.35)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
@@ -224,7 +235,7 @@ export default function Dashboard() {
                         Economic Times
                       </span>
                       {item.genres && item.genres.map(g => (
-                        <span key={g} style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '4px', color: 'var(--gold)' }}>
+                        <span key={g} style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(229, 62, 62, 0.1)', borderRadius: '4px', color: 'var(--gold)' }}>
                           {g}
                         </span>
                       ))}
@@ -235,8 +246,11 @@ export default function Dashboard() {
                     <p style={{ fontSize: '0.95rem', color: 'var(--text-dim)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0 }}>
                       {item.description || item.content?.substring(0, 200)}...
                     </p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--gold)', marginTop: '0.75rem', fontFamily: 'DM Mono, monospace', letterSpacing: '0.05em' }}>
+                      READ IN APP →
+                    </p>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           )}

@@ -8,9 +8,9 @@ client = OpenAI(
 )
 
 def extract_players(articles):
-    articles = articles[:3]
+    articles = list(articles)[:20]
 
-    combined_text = "\n".join([a[:300] for a in articles])
+    combined_text = "\n".join([a[:1500] for a in articles])
 
     response = client.chat.completions.create(
         model="openai/gpt-4o-mini",
