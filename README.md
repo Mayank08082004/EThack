@@ -8,6 +8,41 @@ Please refer to the original `HACKATHON_GUIDE.md` for context and architecture r
 
 ---
 
+## 🚀 Quick Start / Setup
+
+Follow these steps to get the ET Intelligence Newsroom running on your local machine.
+
+### 1. Prerequisites
+
+- **Node.js** (v18+)
+- **Python** (v3.10+)
+- **Supabase Account** (for database & vector storage)
+- **Gemini API Key** (for AI analysis)
+
+### 2. Backend Setup
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env      # Update with your Supabase & Gemini keys
+uvicorn app.main:app --reload
+```
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local # Update with your Supabase keys
+npm run dev
+```
+
+The app will be available at `http://localhost:3000`.
+
+---
+
 ## 🟢 What is DONE (Current Progress)
 
 ### 1. The Core Infrastructure & Phase 1 (100% Complete)
