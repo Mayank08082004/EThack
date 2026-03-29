@@ -1,14 +1,12 @@
 'use client';
- 
+
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import API from "@/services/api";
-<<<<<<< HEAD
 import { MessageSquare, X, Send, Bot, User, ArrowLeft, Tv2 } from 'lucide-react';
-=======
-import { MessageSquare, X, Send, Bot, User, ArrowLeft } from 'lucide-react';
->>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
- 
+
+
+
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface TimelineItem {
   event: string;
@@ -16,7 +14,7 @@ interface TimelineItem {
   stage: string;
   date?: string;
 }
- 
+
 interface Article {
   title: string;
   content: string;
@@ -24,7 +22,7 @@ interface Article {
   image?: string;
   source?: string;
 }
- 
+
 interface SentimentShift {
   timeframe: string;
   score: number;
@@ -52,7 +50,7 @@ interface ChatMessage {
   role: "user" | "assistant";
   text: string;
 }
- 
+
 interface StoryData {
   story_id: string;
   title: string;
@@ -65,7 +63,7 @@ interface StoryData {
   predictions?: Prediction[];
   articles: Article[];
 }
- 
+
 /* ─── Component ─────────────────────────────────────────────────────── */
 export default function StoryPage() {
   const params = useParams();
@@ -76,10 +74,7 @@ export default function StoryPage() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-<<<<<<< HEAD
   const [showVideo, setShowVideo] = useState(true);
-=======
->>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -88,7 +83,7 @@ export default function StoryPage() {
       text: "Ask me anything about this story and I’ll answer from the tracked articles.",
     },
   ]);
- 
+
   useEffect(() => {
     if (!params?.id) return;
     API.get(`/stories/${params.id}`).then(res => setData(res.data));
@@ -142,7 +137,7 @@ export default function StoryPage() {
       setChatLoading(false);
     }
   };
- 
+
   return (
     <div className="story-root">
       {!data ? (
@@ -161,7 +156,7 @@ export default function StoryPage() {
             <div className="article-reader-brand">ET Intelligence</div>
             <div className="article-nav-actions" />
           </nav>
- 
+
           {/* ── Hero ── */}
           <header className="hero" style={{ position: 'relative' }}>
             <p className="hero-eyebrow anim anim-1">Market Intelligence</p>
@@ -248,10 +243,10 @@ export default function StoryPage() {
               </div>
             )}
           </header>
- 
+
           {/* ── Body Grid ── */}
           <div className="story-body">
- 
+
             {/* ── Left column ── */}
             <main>
               {/* Summary */}
@@ -289,7 +284,7 @@ export default function StoryPage() {
                   </div>
                 </div>
               )}
- 
+
               {/* Contrarian Perspectives */}
               {data.contrarian_perspectives && data.contrarian_perspectives.length > 0 && (
                 <div className="anim anim-4">
@@ -346,10 +341,10 @@ export default function StoryPage() {
                       {/* Content Right */}
                       <div className="news-card-content">
                         <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', alignItems: 'center' }}>
-                          <span style={{ 
-                            fontSize: '0.75rem', 
-                            color: 'var(--gold)', 
-                            textTransform: 'uppercase', 
+                          <span style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--gold)',
+                            textTransform: 'uppercase',
                             letterSpacing: '0.05em',
                             background: 'rgba(212, 175, 55, 0.1)',
                             padding: '2px 8px',
@@ -359,24 +354,24 @@ export default function StoryPage() {
                           </span>
                           {item.published_at && (
                             <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
-                              {isNaN(new Date(item.published_at).getTime()) 
-                                ? item.published_at 
+                              {isNaN(new Date(item.published_at).getTime())
+                                ? item.published_at
                                 : new Date(item.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                             </span>
                           )}
                         </div>
-                        <h3 className="news-card-title" style={{ 
-                          fontSize: '1.2rem', 
-                          fontWeight: 600, 
-                          lineHeight: 1.4, 
+                        <h3 className="news-card-title" style={{
+                          fontSize: '1.2rem',
+                          fontWeight: 600,
+                          lineHeight: 1.4,
                           marginBottom: '8px',
                           fontFamily: "'Playfair Display', serif"
                         }}>
                           {item.title}
                         </h3>
-                        <p className="news-card-desc" style={{ 
-                          fontSize: '0.85rem', 
-                          color: 'var(--muted)', 
+                        <p className="news-card-desc" style={{
+                          fontSize: '0.85rem',
+                          color: 'var(--muted)',
                           lineHeight: 1.6,
                           display: '-webkit-box',
                           WebkitLineClamp: 3,
@@ -393,8 +388,8 @@ export default function StoryPage() {
 
               {/* Predictions */}
               {data.predictions && data.predictions.length > 0 && (
-                <div className="anim anim-5" style={{marginTop: '40px'}}>
-                  <p className="section-label" style={{color: 'var(--gold)'}}>🔮 What to Watch Next</p>
+                <div className="anim anim-5" style={{ marginTop: '40px' }}>
+                  <p className="section-label" style={{ color: 'var(--gold)' }}>🔮 What to Watch Next</p>
                   <div className="predictions-grid">
                     {data.predictions.map((pred, i) => (
                       <div className="prediction-card" key={i}>
@@ -409,10 +404,10 @@ export default function StoryPage() {
                 </div>
               )}
             </main>
- 
+
             {/* ── Sidebar ── */}
             <aside className="sidebar anim anim-3">
- 
+
               {/* Key Players */}
               {data.players && data.players.length > 0 && (
                 <div className="players-card">
@@ -436,24 +431,24 @@ export default function StoryPage() {
 
               {/* Timeline */}
               <div className="timeline-card">
-                <div className="timeline-header" style={{display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px'}}>
-                  <p className="section-label" style={{marginBottom: 0}}>Interactive Timeline</p>
-                  
+                <div className="timeline-header" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+                  <p className="section-label" style={{ marginBottom: 0 }}>Interactive Timeline</p>
+
                   {data && (
-                    <div className="timeline-filters" style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-                      <select 
-                        value={filterStage} 
+                    <div className="timeline-filters" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <select
+                        value={filterStage}
                         onChange={(e) => setFilterStage(e.target.value)}
                         className="filter-select"
-                        style={{flex: 1, minWidth: '100px'}}
+                        style={{ flex: 1, minWidth: '100px' }}
                       >
                         {stageSet.map(s => <option key={s} value={s}>{s === "All" ? "All Stages" : s}</option>)}
                       </select>
-                      <select 
-                        value={filterImpact} 
+                      <select
+                        value={filterImpact}
                         onChange={(e) => setFilterImpact(e.target.value)}
                         className="filter-select"
-                        style={{flex: 1, minWidth: '100px'}}
+                        style={{ flex: 1, minWidth: '100px' }}
                       >
                         <option value="All">All Impacts</option>
                         <option value="Positive">Positive</option>
@@ -466,19 +461,19 @@ export default function StoryPage() {
 
                 <div className="timeline-list">
                   {filteredTimeline.length === 0 ? (
-                    <p className="timeline-empty" style={{color: 'var(--muted)', fontStyle: 'italic'}}>No events match the selected filters.</p>
+                    <p className="timeline-empty" style={{ color: 'var(--muted)', fontStyle: 'italic' }}>No events match the selected filters.</p>
                   ) : filteredTimeline.map((item, i) => {
                     const isPos = item.impact === "Positive";
                     return (
-                      <div className="timeline-item anim anim-2" key={i} style={{animationDelay: `${i * 100}ms`}}>
+                      <div className="timeline-item anim anim-2" key={i} style={{ animationDelay: `${i * 100}ms` }}>
                         <div className="timeline-dot-col">
                           <div className={`timeline-dot ${isPos ? "pos" : item.impact === 'Negative' ? "neg" : "neu"}`} />
                           {i < filteredTimeline.length - 1 && <div className="timeline-line" />}
                         </div>
                         <div className="timeline-body">
-                          <div className="timeline-meta" style={{display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px'}}>
-                            <p className="timeline-stage" style={{margin: 0}}>{item.stage}</p>
-                            {item.date && <span className="timeline-date" style={{fontSize: '0.75rem', color: 'var(--muted)'}}>{item.date}</span>}
+                          <div className="timeline-meta" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                            <p className="timeline-stage" style={{ margin: 0 }}>{item.stage}</p>
+                            {item.date && <span className="timeline-date" style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{item.date}</span>}
                           </div>
                           <p className="timeline-event">{item.event}</p>
                           <span className={`impact-badge ${isPos ? "pos" : item.impact === "Negative" ? "neg" : "neu"}`}>
@@ -490,7 +485,7 @@ export default function StoryPage() {
                   })}
                 </div>
               </div>
- 
+
             </aside>
           </div>
         </>
