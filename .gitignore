@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+backend/venv/
+.venv/
+env/
+venv/
+*.pyc
+__pycache__/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next/
+out/
+build/
+
+# Testing
+.nyc_output
+coverage/
+.jest/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Brain / Antigravity artifacts (internal)
+.gemini/
+.agents/
+.agent/
+_agents/
+_agent/
+brain/
