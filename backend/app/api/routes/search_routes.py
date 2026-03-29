@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.services.embedding import get_embedding
@@ -18,8 +18,9 @@ def get_db():
 
 @router.get("/search")
 def search_story(query: str, db: Session = Depends(get_db)):
-    # 1. Scrape real news from RSS feeds using keyword-llm mapping logic
-    scraped_articles = scrape_news([query])
+    # Use query words themselves as fallback if LLM keyword generation fails
+    query_words = [w.strip() for w in query.lower().split() if len(w.strip()) > 2]
+    scraped_articles = scrape_news([query], fallback_keywords=query_words or [query])
     
     # 2. Get embedding for query to determine semantic similarity
     query_embedding = get_embedding(query)
@@ -69,6 +70,6 @@ def search_story(query: str, db: Session = Depends(get_db)):
     """), {"embedding": str(query_embedding)}).fetchone()
 
     if not result:
-        return {"error": "No story found"}
+        raise HTTPException(status_code=404, detail="No matching story found. Try a different search term.")
 
-    return {"story_id": result[0]}
+    return {"story_id": str(result[0])}

@@ -1,9 +1,9 @@
 'use client';
  
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import API from "@/services/api";
-import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, ArrowLeft } from 'lucide-react';
  
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface TimelineItem {
@@ -65,6 +65,7 @@ interface StoryData {
 /* ─── Component ─────────────────────────────────────────────────────── */
 export default function StoryPage() {
   const params = useParams();
+  const router = useRouter();
   const [data, setData] = useState<StoryData | null>(null);
   const [filterImpact, setFilterImpact] = useState<string>("All");
   const [filterStage, setFilterStage] = useState<string>("All");
@@ -135,16 +136,23 @@ export default function StoryPage() {
   };
  
   return (
-    <>
-
- 
+    <div className="story-root">
       {!data ? (
-        <div className="loading-screen story-root">
+        <div className="loading-screen">
           <div className="loading-ring" />
           <span className="loading-label">Fetching story</span>
         </div>
       ) : (
-        <div className="story-root">
+        <>
+          {/* ── Nav ── */}
+          <nav className="article-reader-nav">
+            <button onClick={() => router.back()} className="article-back-btn">
+              <ArrowLeft size={16} strokeWidth={2} />
+              Back
+            </button>
+            <div className="article-reader-brand">ET Intelligence</div>
+            <div className="article-nav-actions" />
+          </nav>
  
           {/* ── Hero ── */}
           <header className="hero">
@@ -227,43 +235,35 @@ export default function StoryPage() {
                     <div
                       key={i}
                       className="news-card"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '1.5rem',
-                        padding: '1.5rem',
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        borderRadius: '12px',
-                        color: 'inherit',
-                        transition: 'all 0.2s ease',
-                        alignItems: 'flex-start'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      onClick={() => {
+                        const articleId = `story_${params.id}_${i}`;
+                        const articleData = {
+                          id: articleId,
+                          title: item.title,
+                          content: item.content,
+                          description: item.content?.slice(0, 300),
+                          link: (item as unknown as { link?: string }).link || '#',
+                          image: item.image,
+                          source: item.source,
+                          published_at: item.published_at,
+                        };
+                        sessionStorage.setItem(`article_${articleId}`, JSON.stringify(articleData));
+                        router.push(`/article/${articleId}`);
                       }}
                     >
                       {/* Image Left */}
                       {item.image && (
-                        <div style={{ flexShrink: 0, width: '200px', height: '140px', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                        <div className="news-card-img-wrap">
                           <img
                             src={item.image}
                             alt={item.title}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => e.currentTarget.style.display = 'none'}
                           />
                         </div>
                       )}
 
                       {/* Content Right */}
-                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <div className="news-card-content">
                         <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', alignItems: 'center' }}>
                           <span style={{ 
                             fontSize: '0.75rem', 
@@ -412,7 +412,7 @@ export default function StoryPage() {
  
             </aside>
           </div>
-        </div>
+        </>
       )}
 
       {/* ── Floating Chat FAB ── */}
@@ -468,6 +468,6 @@ export default function StoryPage() {
           </button>
         </form>
       </div>
-    </>
+    </div>
   );
 }

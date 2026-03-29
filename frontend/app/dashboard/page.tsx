@@ -67,10 +67,19 @@ export default function Dashboard() {
     if (!query.trim()) return;
     setSearching(true);
     try {
-      const res = await API.get(`/search?query=${query}`);
-      router.push(`/story/${res.data.story_id}`);
-    } catch (err) {
-      console.error(err);
+      const res = await API.get(`/search?query=${encodeURIComponent(query)}`);
+      const storyId = res.data?.story_id;
+      if (!storyId) {
+        alert('No matching story found. Try a different search term.');
+        setSearching(false);
+        return;
+      }
+      router.push(`/story/${storyId}`);
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Search failed. Please try again.';
+      alert(message);
       setSearching(false);
     }
   };
@@ -191,45 +200,20 @@ export default function Dashboard() {
                     sessionStorage.setItem(`article_${item.id}`, JSON.stringify(item));
                     router.push(`/article/${item.id}`);
                   }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '1.5rem',
-                    padding: '1.5rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    transition: 'all 0.2s ease',
-                    alignItems: 'flex-start',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(229, 62, 62, 0.35)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                  }}
                 >
                   {/* Image Left */}
                   {item.image && (
-                    <div style={{ flexShrink: 0, width: '240px', height: '160px', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                    <div className="news-card-img-wrap">
                       <img
                         src={item.image}
                         alt={item.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => e.currentTarget.style.display = 'none'}
                       />
                     </div>
                   )}
 
                   {/* Content Right */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div className="news-card-content">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gold)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                         Economic Times

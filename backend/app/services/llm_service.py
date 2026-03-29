@@ -11,10 +11,13 @@ client = OpenAI(
     api_key=os.getenv("GEMINI_API_KEY"),
 )
 
-def get_trending_keywords(genres: list[str]) -> list[str]:
-    """Uses a small, fast Gemini language model to fetch 10-15 trending keywords based on broad preferences."""
+def get_trending_keywords(genres: list[str], fallback_keywords: list[str] | None = None) -> list[str]:
+    """Uses a small, fast Gemini language model to fetch 10-15 trending keywords based on broad preferences.
+    
+    If the LLM fails, returns `fallback_keywords` if provided, otherwise falls back to the raw genres list.
+    """
     if not genres:
-        return []
+        return fallback_keywords or []
         
     prompt = f"""
     You are an expert news editor. The user wants news about the following domains: {', '.join(genres)}.
@@ -41,5 +44,7 @@ def get_trending_keywords(genres: list[str]) -> list[str]:
         return [str(k).lower() for k in keywords]
     except Exception as e:
         print(f"Failed to generate trending keywords via LLM: {e}")
-        # Fallback to the broad genres if LLM fails
-        return [g.lower() for g in genres]
+        # Use caller-provided fallback keywords if available, otherwise fall back to raw genre IDs
+        effective_fallback = fallback_keywords if fallback_keywords else genres
+        print(f"Using fallback keywords: {effective_fallback}")
+        return [k.lower() for k in effective_fallback]

@@ -3,6 +3,7 @@ from app.services.supabase_client import supabase
 from app.services.scraper_service import scrape_news
 from app.services.embedding import get_embedding
 from typing import Optional
+import time
 
 router = APIRouter()
 
@@ -67,20 +68,38 @@ def sync_news(user_id: str = Depends(get_user_id)):
         prefs_res = supabase.table("user_preferences").select("genres").eq("user_id", user_id).single().execute()
         genres = prefs_res.data.get("genres", []) if prefs_res.data else []
 
-        scraped_articles = scrape_news(requested_genres=genres)
+        scraped_articles = scrape_news(requested_genres=genres, fallback_keywords=genres)
         
-        inserted_count = 0
+        if not scraped_articles:
+            return {"message": "Sync complete", "new_articles": 0, "total_scraped": 0}
+
+        # 1. Batch fetch existing links with retries
+        links = [a["link"] for a in scraped_articles]
+        existing_links = set()
+        max_retries = 3
+
+        for i in range(0, len(links), 50):
+            chunk = links[i:i+50]
+            for attempt in range(max_retries):
+                try:
+                    res = supabase.table("news").select("link").in_("link", chunk).execute()
+                    if res.data:
+                        existing_links.update([r["link"] for r in res.data])
+                    break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        print(f"Failed to fetch existing links chunk: {e}")
+                    time.sleep(1 * (attempt + 1))
+
+        # 2. Filter and generate embeddings
+        new_articles_data = []
         for article in scraped_articles:
-            # Check if exists
-            existing = supabase.table("news").select("id").eq("link", article["link"]).execute()
-            if existing.data and len(existing.data) > 0:
+            if article["link"] in existing_links:
                 continue
                 
-            # Generate embedding
             embedding = get_embedding(article["content"][:8000]) # Cap to avoid token limits
             
-            # Save
-            article_data = {
+            new_articles_data.append({
                 "title": article["title"],
                 "description": article["description"],
                 "content": article["content"],
@@ -89,9 +108,22 @@ def sync_news(user_id: str = Depends(get_user_id)):
                 "source": article["source"],
                 "genres": article["genres"],
                 "embedding": embedding
-            }
-            supabase.table("news").insert(article_data).execute()
-            inserted_count += 1
+            })
+            
+        # 3. Batch Insert with retries
+        inserted_count = 0
+        if new_articles_data:
+            for i in range(0, len(new_articles_data), 10):
+                chunk = new_articles_data[i:i+10]
+                for attempt in range(max_retries):
+                    try:
+                        supabase.table("news").insert(chunk).execute()
+                        inserted_count += len(chunk)
+                        break
+                    except Exception as e:
+                        if attempt == max_retries - 1:
+                            print(f"Failed to insert batch: {e}")
+                        time.sleep(1 * (attempt + 1))
             
         return {"message": "Sync complete", "new_articles": inserted_count, "total_scraped": len(scraped_articles)}
     except Exception as e:
