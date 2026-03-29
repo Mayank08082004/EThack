@@ -65,11 +65,15 @@ def match_genres(text: str, genres: List[str]) -> List[str]:
             matched.append(genre)
     return matched
 
-def scrape_news(requested_genres: List[str] = None) -> List[Dict]:
+def scrape_news(requested_genres: List[str] = None, fallback_keywords: List[str] = None) -> List[Dict]:
     """
     Scrape all RSS feeds. If requested_genres is provided, only return articles 
     that loosely match those genres (via keyword searching the title/summary)
     and tag them. Otherwise, tag them generally.
+
+    fallback_keywords: used if the LLM fails to generate dynamic keywords.
+      - For news feed: pass the user's preference genre IDs
+      - For story arc search: pass the raw search query terms
     """
     if not requested_genres:
         requested_genres = []
@@ -78,7 +82,7 @@ def scrape_news(requested_genres: List[str] = None) -> List[Dict]:
     candidates = []
 
     # Get trending keywords from Gemini LLM for these broad genres
-    dynamic_keywords = get_trending_keywords(requested_genres) if requested_genres else []
+    dynamic_keywords = get_trending_keywords(requested_genres, fallback_keywords=fallback_keywords) if requested_genres else []
 
     # Limit search-driven scraping to 20 relevant articles max to ensure snappy performance
     max_candidates = 20 if requested_genres else 40
