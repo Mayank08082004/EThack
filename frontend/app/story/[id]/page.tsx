@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import API from "@/services/api";
+<<<<<<< HEAD
 import { MessageSquare, X, Send, Bot, User, ArrowLeft, Tv2 } from 'lucide-react';
+=======
+import { MessageSquare, X, Send, Bot, User, ArrowLeft } from 'lucide-react';
+>>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
  
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface TimelineItem {
@@ -72,7 +76,10 @@ export default function StoryPage() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+<<<<<<< HEAD
   const [showVideo, setShowVideo] = useState(true);
+=======
+>>>>>>> 64dd9ac2d1a3384e7a61c4e11f2c98e66834a70d
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const chatInputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
