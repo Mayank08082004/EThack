@@ -35,7 +35,7 @@ Instead of reading disconnected articles, users get:
 - sentiment shifts across article evolution
 - key player detection
 - contrarian perspective surfacing
-- "what to watch next" predictions
+- "what to watch next" prediction
 
 ### 3. Interactive Story Chat (News Navigator Style)
 - chat with the context of a specific tracked story
